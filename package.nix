@@ -3,19 +3,17 @@
 , fetchurl
 , dpkg
 , autoPatchelfHook
-, qt5
+, qt6
 , pcsclite
-, cups
-, xkeyboard_config
-,
+, libjpeg8
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "certiliamiddleware";
-  version = "3.7.8.1";
+  version = "3.9.6";
 
   src = fetchurl {
-    url = "https://www.certilia.com/update/${finalAttrs.pname}_v${finalAttrs.version}_amd64.deb";
-    hash = "sha256-7WMjazcZ3h+wW4HXlYHj5UmNG+K6MNfkH2sSXB7InZA=";
+    url = "https://www.certilia.com/update/${finalAttrs.pname}_${finalAttrs.version}-1_amd64.deb";
+    hash = "sha256-2cMs0AWbgGC5jEWVuOvrlaGxJW42q3oID1uPyUzyIZI=";
   };
 
   unpackCmd = "dpkg -x $curSrc source";
@@ -23,14 +21,17 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     dpkg
     autoPatchelfHook
-    qt5.wrapQtAppsHook
+    qt6.wrapQtAppsHook
   ];
 
   buildInputs = [
-    qt5.qtbase
+    qt6.qtbase
     pcsclite
-    cups
+    libjpeg8
   ];
+
+  dontConfigure = true;
+  dontBuild = true;
 
   dontStrip = true;
 
@@ -39,15 +40,15 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     mkdir -p $out/bin
     mkdir -p $out/lib
+    mkdir -p $out/share
 
     cp -r etc $out/
-    cp -r usr/lib/akd/certiliamiddleware $out/lib/
-    cp -r usr/share $out/
+    cp -r opt/certiliamiddleware/* $out/lib/
+    cp -r usr/share/applications $out/share/applications
+    cp -r usr/share/pixmaps $out/share/pixmaps
 
-    makeWrapper $out/lib/certiliamiddleware/Client $out/bin/Client \
-      --set QT_XKB_CONFIG_ROOT "${xkeyboard_config}/share/X11/xkb" \
-      --prefix QT_PLUGIN_PATH : "$out/usr/lib/certiliamiddleware/plugins:${qt5.qtbase}/lib/qt-${qt5.qtbase.version}/plugins" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath finalAttrs.buildInputs}"
+    mv $out/lib/CertiliaClient $out/bin/
+    mv $out/lib/CertiliaSigner $out/bin/
 
     runHook postInstall
   '';
@@ -63,7 +64,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     license = with lib.licenses; [ unfree ];
     maintainers = with lib.maintainers; [ marijanp ];
     platforms = lib.platforms.linux;
-    mainProgram = "Client";
+    mainProgram = "CertiliaClient";
     sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
   };
 })
