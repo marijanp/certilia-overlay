@@ -9,11 +9,12 @@
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "certiliamiddleware";
-  version = "3.9.6";
+  version = "3.9.8";
 
   src = fetchurl {
-    url = "https://www.certilia.com/update/${finalAttrs.pname}_${finalAttrs.version}-1_amd64.deb";
-    hash = "sha256-2cMs0AWbgGC5jEWVuOvrlaGxJW42q3oID1uPyUzyIZI=";
+    # Times out using https
+    url = "http://repo.certilia.com/repository/debian/pool/c/${finalAttrs.pname}/${finalAttrs.pname}_${finalAttrs.version}-1_amd64.deb";
+    hash = "sha256-ovnYKU6yvw3akdlljLG97IPjQqhCKvKIGp9u6fE4mXM=";
   };
 
   unpackCmd = "dpkg -x $curSrc source";
