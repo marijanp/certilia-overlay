@@ -12,9 +12,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   version = "3.9.8";
 
   src = fetchurl {
-    # Times out using https
-    url = "http://repo.certilia.com/repository/debian/pool/c/${finalAttrs.pname}/${finalAttrs.pname}_${finalAttrs.version}-1_amd64.deb";
-    hash = "sha256-ovnYKU6yvw3akdlljLG97IPjQqhCKvKIGp9u6fE4mXM=";
+    url = "https://repo.certilia.com/repository/debian/pool/c/${finalAttrs.pname}/${finalAttrs.pname}_${finalAttrs.version}-2_amd64.deb";
+    hash = "sha256-0EMRfjx7vTxRxPtCTN9ehTq3LDJXAFBJQEuqBx/keqI=";
   };
 
   unpackCmd = "dpkg -x $curSrc source";
