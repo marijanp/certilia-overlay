@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   outputs =
     { self, nixpkgs }:
     let
@@ -21,7 +21,7 @@
       overlays.default = import ./overlay.nix;
       packages = withPkgs (pkgs: {
         inherit (pkgs) certilia;
-        default = self.packages.${pkgs.system}.certilia;
+        default = self.packages.${pkgs.stdenv.hostPlatform.system}.certilia;
       });
     };
 }
