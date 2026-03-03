@@ -1,13 +1,30 @@
-{ lib
-, stdenvNoCC
-, fetchurl
-, dpkg
-, autoPatchelfHook
-, qt6
-, pcsclite
-, libjpeg8
+{
+  lib,
+  stdenv,
+  fetchurl,
+  dpkg,
+  autoPatchelfHook,
+  makeWrapper,
+  cups,
+  fontconfig,
+  freetype,
+  glib,
+  libGL,
+  libxkbcommon,
+  openssl,
+  wayland,
+  pcsclite,
+  libjpeg8,
+  # xorg
+  libx11,
+  libxcb,
+  libxcb-cursor,
+  libxcb-image,
+  libxcb-keysyms,
+  libxcb-render-util,
+  libxcb-wm,
 }:
-stdenvNoCC.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (finalAttrs: {
   pname = "certiliamiddleware";
   version = "3.9.8";
 
@@ -21,36 +38,70 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     dpkg
     autoPatchelfHook
-    qt6.wrapQtAppsHook
+    makeWrapper
   ];
 
   buildInputs = [
-    qt6.qtbase
+    cups
+    fontconfig
+    freetype
+    glib
+    libGL
+    libxkbcommon
+    openssl
+    wayland
     pcsclite
     libjpeg8
+    libx11
+    libxcb
+    libxcb-cursor
+    libxcb-image
+    libxcb-keysyms
+    libxcb-render-util
+    libxcb-wm
   ];
 
   dontConfigure = true;
   dontBuild = true;
-
   dontStrip = true;
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin
-    mkdir -p $out/lib
-    mkdir -p $out/share
+    mkdir -p $out/bin $out/lib $out/share
 
     cp -r etc $out/
-    cp -r opt/certiliamiddleware/* $out/lib/
-    cp -r usr/share/applications $out/share/applications
-    cp -r usr/share/pixmaps $out/share/pixmaps
 
-    mv $out/lib/CertiliaClient $out/bin/
-    mv $out/lib/CertiliaSigner $out/bin/
+    # Certilia vendors Qt 6.10.0. We intentionally do not use
+    # nixpkgs Qt here because there is no ABI guarantee across Qt builds even
+    # at the same source version.
+    # autoPatchelfHook resolves Qt symbols from the vendored libs in $out/lib/
+    # and the runtime dependencies from the buildInputs.
+    # This copies the vendored Qt libs into $out/lib/
+    cp -r opt/certiliamiddleware/lib/. $out/lib/
+
+    cp -r opt/certiliamiddleware/plugins $out/lib/
+    cp -r opt/certiliamiddleware/pkcs11 $out/lib/
+    cp -r opt/certiliamiddleware/certificates $out/lib/
+    cp -r opt/certiliamiddleware/licenses $out/lib/
+
+    cp -r usr/share/applications $out/share/
+    cp -r usr/share/pixmaps $out/share/
+
+    install -m755 opt/certiliamiddleware/CertiliaClient $out/bin/
+    install -m755 opt/certiliamiddleware/CertiliaSigner $out/bin/
 
     runHook postInstall
+  '';
+
+  preFixup = ''
+    # Force xcb so the app runs via XWayland on Wayland sessions,
+    # because the vendored Qt only ships libqxcb.so.
+    for bin in CertiliaClient CertiliaSigner; do
+      wrapProgram $out/bin/$bin \
+        --prefix QT_PLUGIN_PATH : "$out/lib/plugins" \
+        --set QT_QPA_PLATFORM xcb
+    done
   '';
 
   meta = {
