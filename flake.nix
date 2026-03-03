@@ -18,6 +18,7 @@
         );
     in
     {
+      formatter = withPkgs (pkgs: pkgs.nixfmt-tree);
       overlays.default = import ./overlay.nix;
       packages = withPkgs (pkgs: {
         inherit (pkgs) certilia;
