@@ -26,11 +26,11 @@
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "certiliamiddleware";
-  version = "3.9.8";
+  version = "3.9.14";
 
   src = fetchurl {
-    url = "https://repo.certilia.com/repository/debian/pool/c/${finalAttrs.pname}/${finalAttrs.pname}_${finalAttrs.version}-2_amd64.deb";
-    hash = "sha256-0EMRfjx7vTxRxPtCTN9ehTq3LDJXAFBJQEuqBx/keqI=";
+    url = "https://repo.certilia.com/repository/debian/pool/c/${finalAttrs.pname}/${finalAttrs.pname}_${finalAttrs.version}-1_amd64.deb";
+    hash = "sha256-8GAvIsA9//2oUFq4t3jbBdN8qm1ehRmcTpX0oQsM1Dc=";
   };
 
   unpackCmd = "dpkg -x $curSrc source";
