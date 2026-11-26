@@ -71,6 +71,7 @@ Add the overlay as a Flake input, enable the smart card daemon (pcscd), install 
             enable = true;
             policies.SecurityDevices."CertiliaMiddleware" =
               "${pkgs.certilia}/lib/pkcs11/libCertiliaPkcs11.so";
+          };
         })
       ];
     };
